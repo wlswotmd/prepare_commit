@@ -62,6 +62,11 @@ static int test_close(struct inode* inode, struct file* file) {
     return 0;
 }
 
+static int test_uevent(struct device *dev, struct kobj_uevent_env *env)
+{
+    add_uevent_var(env, "DEVMODE=%#o", 0666);
+    return 0;
+}
 
 static struct file_operations fops = {
     .open           = test_open,
@@ -77,6 +82,7 @@ static int __init module_initialize(void) {
 
     dev_id = register_chrdev(0, DEVICE_NAME, &fops);
     class = class_create(THIS_MODULE, DEVICE_NAME);
+    class->dev_uevent = test_uevent;
     device_create(class, NULL, MKDEV(dev_id, 0), NULL, DEVICE_NAME);
 
     return 0;
